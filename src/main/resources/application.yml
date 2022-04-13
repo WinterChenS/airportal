@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: airportal
+  servlet:
+    multipart:
+      enabled: true # 启用上传处理，默认是true
+      file-size-threshold: 1MB   # 当上传文件达到1MB的时候进行磁盘写入
+      max-request-size: 500MB    # 设置最大的请求文件的大小
+      max-file-size: 500MB    # 设置单个文件的最大长度
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+server:
+  port: 8080
