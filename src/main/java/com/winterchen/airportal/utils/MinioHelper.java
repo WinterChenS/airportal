@@ -35,7 +35,7 @@ public class MinioHelper {
     private MinioClient client;
 
     @Autowired
-    private MinioProperties minioProperties;
+    public MinioProperties minioProperties;
 
 
     /**

@@ -7,7 +7,9 @@ package com.winterchen.airportal.rest;
  * @description TODO
  **/
 
+import com.winterchen.airportal.annotation.NotLoginAccess;
 import com.winterchen.airportal.enums.UploadType;
+import com.winterchen.airportal.response.FileInfoResponse;
 import com.winterchen.airportal.response.ShareResponse;
 import com.winterchen.airportal.service.ShareService;
 import io.swagger.annotations.*;
@@ -72,6 +74,7 @@ public class ShareController {
     }
 
 
+    @NotLoginAccess
     @ApiOperation("提取")
     @GetMapping("/take/{takeCode}")
     public String tack(
@@ -94,6 +97,16 @@ public class ShareController {
     ) {
         takeCode = takeCode.trim().substring(0, 6);
         return shareService.checkNeedPass(takeCode);
+    }
+
+    @ApiOperation("查询基本信息")
+    @GetMapping("/info/{takeCode}")
+    public FileInfoResponse getInfo(
+        @PathVariable("takeCode")
+        String takeCode
+    ) {
+        takeCode = takeCode.trim().substring(0, 6);
+        return shareService.findFileInfo(takeCode);
     }
 
 }

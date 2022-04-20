@@ -105,6 +105,7 @@ public class FileUploadService extends AbstractUploadService {
         log.info("end file upload");
         return ShareResponse.builder()
                 .takeCode(takeCode)
+                .url(minioHelper.minioProperties.getDownloadUri() + "/download/" + takeCode)
                 .build();
     }
 

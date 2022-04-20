@@ -2,10 +2,12 @@ package com.winterchen.airportal.service;
 
 import com.winterchen.airportal.entity.FileInfo;
 import com.winterchen.airportal.factory.UploadProviderFactory;
+import com.winterchen.airportal.response.FileInfoResponse;
 import com.winterchen.airportal.response.ShareResponse;
 import com.winterchen.airportal.utils.EhcacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -60,6 +62,23 @@ public class ShareService {
         return provider.get(takeCode, pass, response);
     }
 
+    /**
+     * 获取基本信息
+     * @param takeCode
+     * @return
+     */
+    public FileInfoResponse findFileInfo(String takeCode) {
+        final FileInfo fileInfo = (FileInfo) EhcacheUtil.get(takeCode);
+        Assert.notNull(fileInfo, "文件不存在");
+        return toConvertToResponse(fileInfo);
+    }
+
+    private FileInfoResponse toConvertToResponse(FileInfo fileInfo) {
+        if (fileInfo == null) return null;
+        FileInfoResponse response = new FileInfoResponse();
+        BeanUtils.copyProperties(fileInfo, response);
+        return response;
+    }
 
 
 

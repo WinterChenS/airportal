@@ -18,4 +18,6 @@ public class ShareResponse {
     @ApiModelProperty("取件码")
     private String takeCode;
 
+    private String url;
+
 }
