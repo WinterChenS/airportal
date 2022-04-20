@@ -10,8 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author winterchen
@@ -22,6 +24,13 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @Service
 public class ShareService {
+
+    private final FileUploadService fileUploadService;
+
+    public ShareService(FileUploadService fileUploadService) {
+        this.fileUploadService = fileUploadService;
+    }
+
 
     /**
      * 分享
@@ -35,6 +44,21 @@ public class ShareService {
     public ShareResponse upload(Object content, String pass, Integer expire, Integer maxGetCount, String type) {
         final UploadService provider = UploadProviderFactory.getProvider(type);
         return provider.upload(content,pass,expire,maxGetCount);
+    }
+
+
+    /**
+     * 检查分享的文件是否有效，如果无效就将分享的文件状态置为失效即可
+     */
+    public void checkValidateAndRemove() {
+        final List<FileInfo> fileInfos = fileUploadService.listUnRemoveAndNeedRemoveInfos();
+        if (CollectionUtils.isEmpty(fileInfos)) {
+            return;
+        }
+        fileInfos.forEach(info -> {
+            final UploadService provider = UploadProviderFactory.getProvider(info.getType());
+            provider.remove(info);
+        });
     }
 
     /**
@@ -73,12 +97,18 @@ public class ShareService {
         return toConvertToResponse(fileInfo);
     }
 
+
+
+
+
     private FileInfoResponse toConvertToResponse(FileInfo fileInfo) {
         if (fileInfo == null) return null;
         FileInfoResponse response = new FileInfoResponse();
         BeanUtils.copyProperties(fileInfo, response);
         return response;
     }
+
+
 
 
 

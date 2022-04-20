@@ -41,6 +41,7 @@ public class FileUploadService extends AbstractUploadService {
     private final MinioHelper minioHelper;
 
     public FileUploadService(MongoTemplate mongoTemplate, MinioHelper minioHelper) {
+        super(mongoTemplate);
         this.mongoTemplate = mongoTemplate;
         this.minioHelper = minioHelper;
     }
@@ -146,5 +147,20 @@ public class FileUploadService extends AbstractUploadService {
         mongoTemplate.save(fileInfo);
         EhcacheUtil.put(takeCode, fileInfo);
         return null;
+    }
+
+    @Override
+    public void remove(FileInfo fileInfo) {
+        if (fileInfo == null) return;
+        log.info("清除失效的文件开始, fileInfo: [{}]",fileInfo);
+        fileInfo.setDeleted(true);
+        fileInfo.setUpdateTime(new Date());
+        try {
+            minioHelper.removeFile(fileInfo.getUploadName());
+        } catch (Exception e) {
+            log.error("删除文件失败", e);
+        }
+        mongoTemplate.save(fileInfo);
+        log.info("清除失效的文件结束, fileInfo: [{}]",fileInfo);
     }
 }

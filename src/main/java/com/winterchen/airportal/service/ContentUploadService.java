@@ -33,6 +33,7 @@ public class ContentUploadService extends AbstractUploadService {
     private final MongoTemplate mongoTemplate;
 
     public ContentUploadService(MongoTemplate mongoTemplate) {
+        super(mongoTemplate);
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -111,5 +112,15 @@ public class ContentUploadService extends AbstractUploadService {
         mongoTemplate.save(fileInfo);
         EhcacheUtil.put(takeCode, fileInfo);
         return fileInfo.getContent();
+    }
+
+    @Override
+    public void remove(FileInfo fileInfo) {
+        if (fileInfo == null) return;
+        log.info("清除失效的内容开始, fileInfo: [{}]",fileInfo);
+        fileInfo.setDeleted(true);
+        fileInfo.setUpdateTime(new Date());
+        mongoTemplate.save(fileInfo);
+        log.info("清除失效的内容结束, fileInfo: [{}]",fileInfo);
     }
 }

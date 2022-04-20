@@ -1,5 +1,6 @@
 package com.winterchen.airportal.service;
 
+import com.winterchen.airportal.entity.FileInfo;
 import com.winterchen.airportal.response.ShareResponse;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,5 +31,8 @@ public interface UploadService {
      * @return
      */
     String get(String takeCode, String pass, HttpServletResponse response);
+
+
+    void remove(FileInfo fileInfo);
 
 }

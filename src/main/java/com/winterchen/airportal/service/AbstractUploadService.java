@@ -1,7 +1,14 @@
 package com.winterchen.airportal.service;
 
 import cn.hutool.core.util.RandomUtil;
+import com.winterchen.airportal.entity.FileInfo;
 import com.winterchen.airportal.utils.EhcacheUtil;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author winterchen
@@ -10,6 +17,20 @@ import com.winterchen.airportal.utils.EhcacheUtil;
  * @description
  **/
 public abstract class AbstractUploadService implements UploadService {
+
+    private final MongoTemplate mongoTemplate;
+
+    protected AbstractUploadService(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
+
+
+    public List<FileInfo> listUnRemoveAndNeedRemoveInfos() {
+        final Criteria criteria = Criteria.where("deleted").is(false);
+        criteria.orOperator(Criteria.where("lastDownloadTime").lt(new Date()),Criteria.where("maxGetCount").lt(1));
+        Query query = new Query(criteria);
+        return mongoTemplate.find(query, FileInfo.class);
+    }
 
 
     protected String createTakeCode() {
