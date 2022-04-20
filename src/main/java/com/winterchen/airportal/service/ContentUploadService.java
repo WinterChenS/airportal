@@ -115,6 +115,12 @@ public class ContentUploadService extends AbstractUploadService {
     }
 
     @Override
+    public boolean check(String takeCode, String pass) {
+        final String s = get(takeCode, pass, null);
+        return StringUtils.isNotBlank(s);
+    }
+
+    @Override
     public void remove(FileInfo fileInfo) {
         if (fileInfo == null) return;
         log.info("清除失效的内容开始, fileInfo: [{}]",fileInfo);

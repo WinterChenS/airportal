@@ -91,9 +91,11 @@ public class ShareService {
      * @param takeCode
      * @return
      */
-    public FileInfoResponse findFileInfo(String takeCode) {
+    public FileInfoResponse findFileInfo(String takeCode, String pass) {
         final FileInfo fileInfo = (FileInfo) EhcacheUtil.get(takeCode);
         Assert.notNull(fileInfo, "文件不存在");
+        final UploadService provider = UploadProviderFactory.getProvider(fileInfo.getType());
+        Assert.isTrue(provider.check(takeCode, pass));
         return toConvertToResponse(fileInfo);
     }
 

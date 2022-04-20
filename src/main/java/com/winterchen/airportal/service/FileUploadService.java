@@ -114,6 +114,22 @@ public class FileUploadService extends AbstractUploadService {
     @Transactional(rollbackFor = Exception.class)
     public String get(String takeCode, String pass, HttpServletResponse response) {
         //需要从缓存中查询校验码，如果不存在就不进行后续的操作，防止被刷库,同时校验密码
+        FileInfo fileInfo = checkFileInfo(takeCode, pass);
+
+        //download
+        try {
+            minioHelper.download(response, fileInfo.getUploadName(), fileInfo.getRealName());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), "文件下载失败");
+        }
+        fileInfo.setMaxGetCount(fileInfo.getMaxGetCount() - 1);
+        mongoTemplate.save(fileInfo);
+        EhcacheUtil.put(takeCode, fileInfo);
+        return null;
+    }
+
+    private FileInfo checkFileInfo(String takeCode, String pass) {
         final FileInfo fileInfoInCache = (FileInfo) EhcacheUtil.get(takeCode);
         Assert.notNull(fileInfoInCache, "文件不存在");
         if (StringUtils.isNotBlank(fileInfoInCache.getPass())) {
@@ -135,18 +151,12 @@ public class FileUploadService extends AbstractUploadService {
         Query query = new Query(Criteria.where("takeCode").is(takeCode).and("deleted").is(false));
         final FileInfo fileInfo = mongoTemplate.findOne(query, FileInfo.class);
         Assert.notNull(fileInfo, "文件不存在");
+        return fileInfo;
+    }
 
-        //download
-        try {
-            minioHelper.download(response, fileInfo.getUploadName(), fileInfo.getRealName());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), "文件下载失败");
-        }
-        fileInfo.setMaxGetCount(fileInfo.getMaxGetCount() - 1);
-        mongoTemplate.save(fileInfo);
-        EhcacheUtil.put(takeCode, fileInfo);
-        return null;
+    @Override
+    public boolean check(String takeCode, String pass) {
+        return checkFileInfo(takeCode, pass) != null;
     }
 
     @Override

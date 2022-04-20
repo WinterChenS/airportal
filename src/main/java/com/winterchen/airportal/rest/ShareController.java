@@ -103,10 +103,13 @@ public class ShareController {
     @GetMapping("/info/{takeCode}")
     public FileInfoResponse getInfo(
         @PathVariable("takeCode")
-        String takeCode
+        String takeCode,
+        @RequestParam(name = "pass", required = false)
+        @ApiParam(value = "pass",required = false)
+                String pass
     ) {
         takeCode = takeCode.trim().substring(0, 6);
-        return shareService.findFileInfo(takeCode);
+        return shareService.findFileInfo(takeCode, pass);
     }
 
 }

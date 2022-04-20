@@ -33,6 +33,9 @@ public interface UploadService {
     String get(String takeCode, String pass, HttpServletResponse response);
 
 
+    boolean check(String takeCode, String pass);
+
+
     void remove(FileInfo fileInfo);
 
 }
