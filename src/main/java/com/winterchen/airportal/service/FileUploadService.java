@@ -162,7 +162,6 @@ public class FileUploadService extends AbstractUploadService {
     public ShareResponse completeMultipartUpload(CompleteMultipartUploadRequest uploadRequest) {
         log.info("文件合并开始, uploadRequest: [{}]", uploadRequest);
         try {
-            Part[] parts = new Part[uploadRequest.getChunkSize() + 1];
             final String takeCode = createTakeCode();
             final ListPartsResponse listMultipart = minioHelper.listMultipart(MultipartUploadCreate.builder()
                     .bucketName(minioHelper.minioProperties.getBucketName())
@@ -171,16 +170,11 @@ public class FileUploadService extends AbstractUploadService {
                     .uploadId(uploadRequest.getUploadId())
                     .partNumberMarker(0)
                     .build());
-            for (int i = 0; i < listMultipart.result().partList().size(); i++) {
-                final Part part = listMultipart.result().partList().get(i);
-                parts[i] = new Part(i, part.etag());
-            }
             final ObjectWriteResponse objectWriteResponse = minioHelper.completeMultipartUpload(MultipartUploadCreate.builder()
                     .bucketName(minioHelper.minioProperties.getBucketName())
                     .uploadId(uploadRequest.getUploadId())
                     .objectName(uploadRequest.getFileName())
-                    .maxParts(10000)
-                    .parts(parts)
+                    .parts(listMultipart.result().partList().toArray(new Part[]{}))
                     .build());
             final Date now = new Date();
             final String url = minioHelper.minioProperties.getDownloadUri() + "/download/" + takeCode;
