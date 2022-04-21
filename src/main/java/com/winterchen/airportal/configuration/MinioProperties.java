@@ -32,4 +32,7 @@ public class MinioProperties {
 
     private String downloadUri;
 
+
+    private String path;
+
 }

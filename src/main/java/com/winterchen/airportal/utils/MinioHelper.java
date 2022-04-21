@@ -3,9 +3,13 @@ package com.winterchen.airportal.utils;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import com.winterchen.airportal.base.FileUploadResult;
+import com.winterchen.airportal.base.MultipartUploadCreate;
+import com.winterchen.airportal.base.ResultCode;
 import com.winterchen.airportal.configuration.MinioProperties;
+import com.winterchen.airportal.exception.BusinessException;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.http.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author winterchen
@@ -32,7 +37,7 @@ import java.util.Date;
 public class MinioHelper {
 
     @Autowired
-    private MinioClient client;
+    private PearlMinioClient client;
 
     @Autowired
     public MinioProperties minioProperties;
@@ -110,6 +115,73 @@ public class MinioHelper {
                     log.error(e.getMessage(), e);
                 }
             }
+        }
+    }
+
+
+
+    public CreateMultipartUploadResponse uploadId(MultipartUploadCreate multipartUploadCreate){
+        try {
+            return client.createMultipartUpload(multipartUploadCreate.getBucketName(), multipartUploadCreate.getRegion(), multipartUploadCreate.getObjectName(), multipartUploadCreate.getHeaders(), multipartUploadCreate.getExtraQueryParams());
+        } catch (Exception e) {
+            log.error("获取上传编号失败", e);
+            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), e.getMessage());
+        }
+    }
+
+
+    /**
+     * 获取分片上传的信息
+     * @param multipartUploadCreate
+     * @return
+     */
+    public CreateMultipartUploadResponse createMultipartUpload(MultipartUploadCreate multipartUploadCreate) {
+        try {
+            return client.createMultipartUpload(multipartUploadCreate.getBucketName(), multipartUploadCreate.getRegion(), multipartUploadCreate.getObjectName(), multipartUploadCreate.getHeaders(), multipartUploadCreate.getExtraQueryParams());
+        } catch (Exception e) {
+            log.error("创建分片上传失败", e);
+            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), e.getMessage());
+        }
+    }
+
+    /**
+     * 合并分片
+     * @param multipartUploadCreate
+     * @return
+     */
+    public ObjectWriteResponse completeMultipartUpload(MultipartUploadCreate multipartUploadCreate) {
+        try {
+            return client.completeMultipartUpload(multipartUploadCreate.getBucketName(), multipartUploadCreate.getRegion(), multipartUploadCreate.getObjectName(), multipartUploadCreate.getUploadId(), multipartUploadCreate.getParts(), multipartUploadCreate.getHeaders(), multipartUploadCreate.getExtraQueryParams());
+        } catch (Exception e) {
+            log.error("合并分片失败", e);
+            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), e.getMessage());
+        }
+    }
+
+
+    public ListPartsResponse listMultipart(MultipartUploadCreate multipartUploadCreate){
+        try {
+            return client.listMultipart(multipartUploadCreate.getBucketName(), multipartUploadCreate.getRegion(), multipartUploadCreate.getObjectName(), multipartUploadCreate.getMaxParts(), multipartUploadCreate.getPartNumberMarker(), multipartUploadCreate.getUploadId(), multipartUploadCreate.getHeaders(), multipartUploadCreate.getExtraQueryParams());
+        } catch (Exception e) {
+            log.error("查询分片失败", e);
+            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), e.getMessage());
+        }
+    }
+
+
+    public String getPresignedObjectUrl(String bucketName, String objectName, Map<String, String> queryParams) {
+        try {
+            return client.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.PUT)
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .expiry(60 * 60 * 24)
+                            .extraQueryParams(queryParams)
+                            .build());
+        } catch (Exception e) {
+            log.error("查询分片失败", e);
+            throw BusinessException.newBusinessException(ResultCode.KNOWN_ERROR.getCode(), e.getMessage());
         }
     }
 

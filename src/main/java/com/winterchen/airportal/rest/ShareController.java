@@ -9,10 +9,15 @@ package com.winterchen.airportal.rest;
 
 import com.winterchen.airportal.annotation.NotLoginAccess;
 import com.winterchen.airportal.enums.UploadType;
+import com.winterchen.airportal.request.CompleteMultipartUploadRequest;
+import com.winterchen.airportal.request.MultipartUploadCreateRequest;
 import com.winterchen.airportal.response.FileInfoResponse;
+import com.winterchen.airportal.response.MultipartUploadCreateResponse;
 import com.winterchen.airportal.response.ShareResponse;
+import com.winterchen.airportal.service.FileUploadService;
 import com.winterchen.airportal.service.ShareService;
 import io.swagger.annotations.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +31,11 @@ public class ShareController {
 
     private final ShareService shareService;
 
-    public ShareController(ShareService shareService) {
+    private final FileUploadService fileUploadService;
+
+    public ShareController(ShareService shareService, FileUploadService fileUploadService) {
         this.shareService = shareService;
+        this.fileUploadService = fileUploadService;
     }
 
     @ApiImplicitParams({@ApiImplicitParam(name = "file",
@@ -110,6 +118,28 @@ public class ShareController {
     ) {
         takeCode = takeCode.trim().substring(0, 6);
         return shareService.findFileInfo(takeCode, pass);
+    }
+
+    @NotLoginAccess
+    @ApiOperation("创建分片上传")
+    @PostMapping("/multipart/create")
+    public MultipartUploadCreateResponse createMultipartUpload(
+            @RequestBody
+            @Validated
+                    MultipartUploadCreateRequest multipartUploadCreateRequest
+    ) {
+        return fileUploadService.createMultipartUpload(multipartUploadCreateRequest);
+    }
+
+    @NotLoginAccess
+    @ApiOperation("合并分片")
+    @PostMapping("/multipart/complete")
+    public ShareResponse completeMultipartUpload(
+            @RequestBody
+            @Validated
+                    CompleteMultipartUploadRequest uploadRequest
+    ) {
+        return fileUploadService.completeMultipartUpload(uploadRequest);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.winterchen.airportal.configuration;
 
+import com.winterchen.airportal.utils.PearlMinioClient;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,12 +22,12 @@ public class MinioConfiguration {
 
 
     @Bean
-    public MinioClient minioClient() {
+    public PearlMinioClient minioClient() {
         MinioClient minioClient = MinioClient.builder()
                 .endpoint(minioProperties.getEndpoint())
                 .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .build();
-        return minioClient;
+        return new PearlMinioClient(minioClient);
     }
 
 }

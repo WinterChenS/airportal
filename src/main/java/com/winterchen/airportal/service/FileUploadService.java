@@ -3,16 +3,24 @@ package com.winterchen.airportal.service;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import com.winterchen.airportal.base.FileUploadResult;
+import com.winterchen.airportal.base.MultipartUploadCreate;
 import com.winterchen.airportal.base.ResultCode;
 import com.winterchen.airportal.entity.FileInfo;
 import com.winterchen.airportal.entity.UploadRecord;
 import com.winterchen.airportal.enums.UploadType;
 import com.winterchen.airportal.exception.BusinessException;
+import com.winterchen.airportal.request.CompleteMultipartUploadRequest;
+import com.winterchen.airportal.request.MultipartUploadCreateRequest;
+import com.winterchen.airportal.response.MultipartUploadCreateResponse;
 import com.winterchen.airportal.response.ShareResponse;
 import com.winterchen.airportal.utils.EhcacheUtil;
 import com.winterchen.airportal.utils.MinioHelper;
+import io.minio.CreateMultipartUploadResponse;
+import io.minio.ListPartsResponse;
+import io.minio.ObjectWriteResponse;
 import io.minio.errors.InsufficientDataException;
 import io.minio.errors.ServerException;
+import io.minio.messages.Part;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,6 +33,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * @author winterchen
@@ -109,6 +120,112 @@ public class FileUploadService extends AbstractUploadService {
                 .url(minioHelper.minioProperties.getDownloadUri() + "/download/" + takeCode)
                 .build();
     }
+
+
+    /**
+     * 创建分片上传
+     * @param createRequest
+     * @return
+     */
+    public MultipartUploadCreateResponse createMultipartUpload(MultipartUploadCreateRequest createRequest) {
+        log.info("创建分片上传开始, createRequest: [{}]", createRequest);
+        MultipartUploadCreateResponse response = new MultipartUploadCreateResponse();
+        response.setChunks(new LinkedList<>());
+        final MultipartUploadCreate uploadCreate = MultipartUploadCreate.builder()
+                .bucketName(minioHelper.minioProperties.getBucketName())
+                .objectName(createRequest.getFileName())
+                .build();
+        final CreateMultipartUploadResponse uploadId = minioHelper.uploadId(uploadCreate);
+        uploadCreate.setUploadId(uploadId.result().uploadId());
+        response.setUploadId(uploadCreate.getUploadId());
+        Map<String, String> reqParams = new HashMap<>();
+        reqParams.put("uploadId", uploadId.result().uploadId());
+        for (int i = 0; i < createRequest.getChunkSize(); i++) {
+            reqParams.put("partNumber", String.valueOf(i));
+            String presignedObjectUrl = minioHelper.getPresignedObjectUrl(uploadCreate.getBucketName(), uploadCreate.getObjectName(), reqParams);
+            if (StringUtils.isNotBlank(minioHelper.minioProperties.getPath())) {//如果线上环境配置了域名解析，可以进行替换
+                presignedObjectUrl = presignedObjectUrl.replace(minioHelper.minioProperties.getEndpoint(), minioHelper.minioProperties.getPath());
+            }
+            MultipartUploadCreateResponse.UploadCreateItem item = new MultipartUploadCreateResponse.UploadCreateItem();
+            item.setPartNumber(i);
+            item.setUploadUrl(presignedObjectUrl);
+            response.getChunks().add(item);
+        }
+        log.info("创建分片上传结束, createRequest: [{}]", createRequest);
+        return response;
+    }
+
+    /**
+     * 分片合并
+     * @param uploadRequest
+     */
+    public ShareResponse completeMultipartUpload(CompleteMultipartUploadRequest uploadRequest) {
+        log.info("文件合并开始, uploadRequest: [{}]", uploadRequest);
+        try {
+            Part[] parts = new Part[uploadRequest.getChunkSize() + 1];
+            final String takeCode = createTakeCode();
+            final ListPartsResponse listMultipart = minioHelper.listMultipart(MultipartUploadCreate.builder()
+                    .bucketName(minioHelper.minioProperties.getBucketName())
+                    .objectName(uploadRequest.getFileName())
+                    .maxParts(uploadRequest.getChunkSize() + 10)
+                    .uploadId(uploadRequest.getUploadId())
+                    .partNumberMarker(0)
+                    .build());
+            for (int i = 0; i < listMultipart.result().partList().size(); i++) {
+                final Part part = listMultipart.result().partList().get(i);
+                parts[i] = new Part(i, part.etag());
+            }
+            final ObjectWriteResponse objectWriteResponse = minioHelper.completeMultipartUpload(MultipartUploadCreate.builder()
+                    .bucketName(minioHelper.minioProperties.getBucketName())
+                    .uploadId(uploadRequest.getUploadId())
+                    .objectName(uploadRequest.getFileName())
+                    .maxParts(10000)
+                    .parts(parts)
+                    .build());
+            final Date now = new Date();
+            final String url = minioHelper.minioProperties.getDownloadUri() + "/download/" + takeCode;
+            final FileInfo fileInfo = FileInfo.builder()
+                    .bucket(minioHelper.minioProperties.getBucketName())
+                    .size(uploadRequest.getFileSize())
+                    .contentType(uploadRequest.getContentType())
+                    .createTime(now)
+                    .deleted(false)
+                    .expiresHours(uploadRequest.getExpire())
+                    .takeCode(takeCode)
+                    .maxGetCount(uploadRequest.getMaxGetCount())
+                    .realName(uploadRequest.getFileName())
+                    .uploadName(uploadRequest.getFileName())
+                    .url(objectWriteResponse.region())
+                    .updateTime(now)
+                    .lastDownloadTime(DateUtil.offsetHour(now, uploadRequest.getExpire()))
+                    .type(UploadType.FILE.name())
+                    .pass(uploadRequest.getPass())
+                    .build();
+            final FileInfo info = mongoTemplate.save(fileInfo);
+            //上传记录
+            UploadRecord uploadRecord = UploadRecord.builder()
+                    .type(UploadType.FILE.name())
+                    .targetId(info.getId())
+                    .takeCode(takeCode)
+                    .createTime(now)
+                    .build();
+            mongoTemplate.save(uploadRecord);
+            //将取件码写入到缓存，防止被刷库
+            EhcacheUtil.put(takeCode, info);
+            return ShareResponse.builder()
+                    .takeCode(takeCode)
+                    .url(url)
+                    .build();
+        } catch (Exception e) {
+            log.error("合并分片失败", e);
+        }
+        log.info("文件合并结束, uploadRequest: [{}]", uploadRequest);
+        return null;
+    }
+
+
+
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
