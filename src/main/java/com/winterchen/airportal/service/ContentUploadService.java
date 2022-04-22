@@ -9,6 +9,7 @@ import com.winterchen.airportal.enums.UploadType;
 import com.winterchen.airportal.exception.BusinessException;
 import com.winterchen.airportal.response.ShareResponse;
 import com.winterchen.airportal.utils.EhcacheUtil;
+import com.winterchen.airportal.utils.MinioHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -32,9 +33,13 @@ public class ContentUploadService extends AbstractUploadService {
 
     private final MongoTemplate mongoTemplate;
 
-    public ContentUploadService(MongoTemplate mongoTemplate) {
+
+    private final MinioHelper minioHelper;
+
+    public ContentUploadService(MongoTemplate mongoTemplate, MinioHelper minioHelper) {
         super(mongoTemplate);
         this.mongoTemplate = mongoTemplate;
+        this.minioHelper = minioHelper;
     }
 
 
@@ -84,6 +89,7 @@ public class ContentUploadService extends AbstractUploadService {
         log.info("end content upload target: [{}]", target);
         return ShareResponse.builder()
                 .takeCode(takeCode)
+                .url(minioHelper.minioProperties.getDownloadUri() + takeCode + "   粘贴到浏览器打开")
                 .build();
     }
 
