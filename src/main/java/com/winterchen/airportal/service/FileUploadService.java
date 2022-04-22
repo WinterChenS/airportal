@@ -180,7 +180,7 @@ public class FileUploadService extends AbstractUploadService {
                     .parts(listMultipart.result().partList().toArray(new Part[]{}))
                     .build());
             final Date now = new Date();
-            final String url = minioHelper.minioProperties.getDownloadUri() + "/download/" + takeCode  + "   粘贴到浏览器打开";
+            final String url = minioHelper.minioProperties.getDownloadUri() + takeCode  + "   粘贴到浏览器打开";
             final FileInfo fileInfo = FileInfo.builder()
                     .bucket(minioHelper.minioProperties.getBucketName())
                     .size(uploadRequest.getFileSize())
