@@ -24,6 +24,8 @@ public class FileInfoResponse {
 
     private String realName;
 
+    private String takeCode;
+
     private long size;
 
 

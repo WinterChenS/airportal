@@ -7,6 +7,7 @@ import com.winterchen.airportal.base.MultipartUploadCreate;
 import com.winterchen.airportal.base.ResultCode;
 import com.winterchen.airportal.entity.FileInfo;
 import com.winterchen.airportal.entity.UploadRecord;
+import com.winterchen.airportal.entity.User;
 import com.winterchen.airportal.enums.UploadType;
 import com.winterchen.airportal.exception.BusinessException;
 import com.winterchen.airportal.request.CompleteMultipartUploadRequest;
@@ -15,6 +16,7 @@ import com.winterchen.airportal.response.MultipartUploadCreateResponse;
 import com.winterchen.airportal.response.ShareResponse;
 import com.winterchen.airportal.utils.EhcacheUtil;
 import com.winterchen.airportal.utils.MinioHelper;
+import com.winterchen.airportal.utils.UserThreadLocal;
 import io.minio.CreateMultipartUploadResponse;
 import io.minio.ListPartsResponse;
 import io.minio.ObjectWriteResponse;
@@ -163,6 +165,7 @@ public class FileUploadService extends AbstractUploadService {
         log.info("文件合并开始, uploadRequest: [{}]", uploadRequest);
         try {
             final String takeCode = createTakeCode();
+            final User user = UserThreadLocal.getUser();
             final ListPartsResponse listMultipart = minioHelper.listMultipart(MultipartUploadCreate.builder()
                     .bucketName(minioHelper.minioProperties.getBucketName())
                     .objectName(uploadRequest.getFileName())
@@ -183,6 +186,7 @@ public class FileUploadService extends AbstractUploadService {
                     .size(uploadRequest.getFileSize())
                     .contentType(uploadRequest.getContentType())
                     .createTime(now)
+                    .createdAt(user.getId())
                     .deleted(false)
                     .expiresHours(uploadRequest.getExpire())
                     .takeCode(takeCode)
@@ -201,6 +205,7 @@ public class FileUploadService extends AbstractUploadService {
                     .type(UploadType.FILE.name())
                     .targetId(info.getId())
                     .takeCode(takeCode)
+                    .createdAt(user.getId())
                     .createTime(now)
                     .build();
             mongoTemplate.save(uploadRecord);
@@ -239,6 +244,10 @@ public class FileUploadService extends AbstractUploadService {
         EhcacheUtil.put(takeCode, fileInfo);
         return null;
     }
+
+
+
+
 
     private FileInfo checkFileInfo(String takeCode, String pass) {
         final FileInfo fileInfoInCache = (FileInfo) EhcacheUtil.get(takeCode);

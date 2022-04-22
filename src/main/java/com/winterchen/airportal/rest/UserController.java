@@ -57,5 +57,11 @@ public class UserController {
         return userService.login(loginRequest, request);
     }
 
+    @ApiOperation("注销")
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request) {
+        userService.logout(request);
+    }
+
 
 }

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Api(tags = "分享管理")
 @RequestMapping("/share")
@@ -120,7 +121,13 @@ public class ShareController {
         return shareService.findFileInfo(takeCode, pass);
     }
 
-    @NotLoginAccess
+
+    @ApiOperation("查询当前用户的文件列表")
+    @GetMapping("/list/current")
+    public List<FileInfoResponse> listByCurrent() {
+        return shareService.listByCurrent();
+    }
+
     @ApiOperation("创建分片上传")
     @PostMapping("/multipart/create")
     public MultipartUploadCreateResponse createMultipartUpload(
@@ -131,7 +138,6 @@ public class ShareController {
         return fileUploadService.createMultipartUpload(multipartUploadCreateRequest);
     }
 
-    @NotLoginAccess
     @ApiOperation("合并分片")
     @PostMapping("/multipart/complete")
     public ShareResponse completeMultipartUpload(

@@ -1,25 +1,25 @@
-spring:
-  data:
-    mongodb:
-      database: airportal
-      host:
-      port:
-      username:
-      password:
-      authentication-database: admin
-  mail:
-    host:
-    username:
-    password:
-    default-encoding: UTF-8
+#spring:
+#  data:
+#    mongodb:
+#      database: airportal
+#      host:
+#      port:
+#      username:
+#      password:
+#      authentication-database: admin
+#  mail:
+#    host:
+#    username:
+#    password:
+#    default-encoding: UTF-8
 
-minio:
-  endpoint:
-  accessKey:
-  secretKey:
-  bucketName:
-  downloadUri:
-  path:
+#minio:
+#  endpoint:
+#  accessKey:
+#  secretKey:
+#  bucketName:
+#  downloadUri:
+#  path:
 
 swagger:
   enable: true

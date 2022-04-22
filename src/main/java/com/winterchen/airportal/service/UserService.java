@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -124,6 +125,13 @@ public class UserService {
         EhcacheUtil.put(token, user);
         log.info("用户登录结束, loginRequest:[{}]", loginRequest);
         return response;
+    }
+
+    public void logout(HttpServletRequest request) {
+        final String token = request.getHeader(DefaultConstants.User.TOKEN_KEY);
+        if (StringUtils.hasText(token)) {
+            EhcacheUtil.remove(token);
+        }
     }
 
     public User getById(String id) {

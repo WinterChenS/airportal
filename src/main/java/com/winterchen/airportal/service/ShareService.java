@@ -87,6 +87,14 @@ public class ShareService {
     }
 
     /**
+     * 获取当前用户的文件列表
+     * @return
+     */
+    public List<FileInfoResponse> listByCurrent() {
+        return fileUploadService.getFileInfoListByCurrentUser();
+    }
+
+    /**
      * 获取基本信息
      * @param takeCode
      * @return
