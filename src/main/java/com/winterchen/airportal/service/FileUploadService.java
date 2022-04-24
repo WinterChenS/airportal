@@ -79,6 +79,7 @@ public class FileUploadService extends AbstractUploadService {
                     .size(fileUploadResult.getSize())
                     .contentType(multipartFile.getContentType())
                     .createTime(now)
+                    .createdAt(UserThreadLocal.getUser().getId())
                     .deleted(false)
                     .expiresHours(expire)
                     .takeCode(takeCode)

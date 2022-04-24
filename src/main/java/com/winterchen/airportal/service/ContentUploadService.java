@@ -10,6 +10,7 @@ import com.winterchen.airportal.exception.BusinessException;
 import com.winterchen.airportal.response.ShareResponse;
 import com.winterchen.airportal.utils.EhcacheUtil;
 import com.winterchen.airportal.utils.MinioHelper;
+import com.winterchen.airportal.utils.UserThreadLocal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -60,6 +61,7 @@ public class ContentUploadService extends AbstractUploadService {
                     .size(content.length())
                     .contentType(String.class.getTypeName())
                     .createTime(now)
+                    .createdAt(UserThreadLocal.getUser().getId())
                     .deleted(false)
                     .expiresHours(expire)
                     .content(content)
