@@ -43,6 +43,11 @@ public abstract class AbstractUploadService implements UploadService {
         return toConvertToResponseList(mongoTemplate.find(query, FileInfo.class));
     }
 
+    public FileInfo get(String takeCode) {
+        Query query = new Query(Criteria.where("takeCode").is(takeCode).and("deleted").is(false));
+        return mongoTemplate.findOne(query, FileInfo.class);
+    }
+
 
     protected List<FileInfoResponse> toConvertToResponseList(List<FileInfo> fileInfos) {
         if (CollectionUtils.isEmpty(fileInfos)) return Collections.emptyList();

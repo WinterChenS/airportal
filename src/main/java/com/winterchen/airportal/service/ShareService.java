@@ -61,6 +61,13 @@ public class ShareService {
         });
     }
 
+    public void remove(String takeCode) {
+        final FileInfo fileInfo = fileUploadService.get(takeCode);
+        if (fileInfo == null) return;
+        final UploadService provider = UploadProviderFactory.getProvider(fileInfo.getType());
+        provider.remove(fileInfo);
+    }
+
     /**
      * 检查提取是否需要密码
      * @param takeCode

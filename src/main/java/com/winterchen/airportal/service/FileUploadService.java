@@ -169,7 +169,7 @@ public class FileUploadService extends AbstractUploadService {
             final User user = UserThreadLocal.getUser();
             final ListPartsResponse listMultipart = minioHelper.listMultipart(MultipartUploadCreate.builder()
                     .bucketName(minioHelper.minioProperties.getBucketName())
-                    .objectName(uploadRequest.getFileName())
+                    .objectName(uploadRequest.getUploadName())
                     .maxParts(uploadRequest.getChunkSize() + 10)
                     .uploadId(uploadRequest.getUploadId())
                     .partNumberMarker(0)
@@ -177,7 +177,7 @@ public class FileUploadService extends AbstractUploadService {
             final ObjectWriteResponse objectWriteResponse = minioHelper.completeMultipartUpload(MultipartUploadCreate.builder()
                     .bucketName(minioHelper.minioProperties.getBucketName())
                     .uploadId(uploadRequest.getUploadId())
-                    .objectName(uploadRequest.getFileName())
+                    .objectName(uploadRequest.getUploadName())
                     .parts(listMultipart.result().partList().toArray(new Part[]{}))
                     .build());
             final Date now = new Date();
@@ -193,7 +193,7 @@ public class FileUploadService extends AbstractUploadService {
                     .takeCode(takeCode)
                     .maxGetCount(uploadRequest.getMaxGetCount())
                     .realName(uploadRequest.getFileName())
-                    .uploadName(uploadRequest.getFileName())
+                    .uploadName(uploadRequest.getUploadName())
                     .url(objectWriteResponse.region())
                     .updateTime(now)
                     .lastDownloadTime(DateUtil.offsetHour(now, uploadRequest.getExpire()))
@@ -294,4 +294,5 @@ public class FileUploadService extends AbstractUploadService {
         mongoTemplate.save(fileInfo);
         log.info("清除失效的文件结束, fileInfo: [{}]",fileInfo);
     }
+
 }

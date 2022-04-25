@@ -148,4 +148,13 @@ public class ShareController {
         return fileUploadService.completeMultipartUpload(uploadRequest);
     }
 
+    @ApiOperation("移除分享")
+    @PostMapping("/remove/{takeCode}")
+    public void remove(
+            @PathVariable("takeCode")
+            String takeCode
+    ) {
+        shareService.remove(takeCode);
+    }
+
 }

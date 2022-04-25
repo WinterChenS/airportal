@@ -16,6 +16,9 @@ public class CompleteMultipartUploadRequest {
     @ApiModelProperty("文件名称")
     private String fileName;
 
+    @ApiModelProperty("文件上传名称")
+    private String uploadName;
+
     @ApiModelProperty("上传编号")
     private String uploadId;
 
