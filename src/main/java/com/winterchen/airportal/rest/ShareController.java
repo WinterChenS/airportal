@@ -7,6 +7,7 @@ package com.winterchen.airportal.rest;
  * @description TODO
  **/
 
+import cn.hutool.core.lang.Assert;
 import com.winterchen.airportal.annotation.NotLoginAccess;
 import com.winterchen.airportal.enums.UploadType;
 import com.winterchen.airportal.request.CompleteMultipartUploadRequest;
@@ -94,20 +95,24 @@ public class ShareController {
             String pass,
             HttpServletResponse response
     ) {
+        Assert.isTrue(takeCode.length() >= 6, "文件不存在");
         takeCode = takeCode.trim().substring(0, 6);
         return shareService.get(takeCode, pass, response);
     }
 
+    @NotLoginAccess
     @ApiOperation("检查提取是否需要密码")
     @GetMapping("/check/need-pass/{takeCode}")
     public Boolean checkNeedPass(
             @PathVariable("takeCode")
             String takeCode
     ) {
+        Assert.isTrue(takeCode.length() >= 6, "文件不存在");
         takeCode = takeCode.trim().substring(0, 6);
         return shareService.checkNeedPass(takeCode);
     }
 
+    @NotLoginAccess
     @ApiOperation("查询基本信息")
     @GetMapping("/info/{takeCode}")
     public FileInfoResponse getInfo(
