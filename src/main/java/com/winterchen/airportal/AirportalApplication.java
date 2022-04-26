@@ -4,8 +4,10 @@ import com.winterchen.airportal.factory.YamlPropertySourceFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableAsync
 @EnableScheduling
 @SpringBootApplication
 @PropertySource(value = {"file:/home/winterchen/conf/airportal.yml"}, encoding = "UTF-8", ignoreResourceNotFound = true, factory = YamlPropertySourceFactory.class)

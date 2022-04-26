@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,6 +50,7 @@ public class MailService {
         this.mongoTemplate = mongoTemplate;
     }
 
+    @Async
     public void sendAttachmentsMail(MailSenderRequest mailSenderRequest, MultipartFile multipartFile){
         if (!enable) {
             return;
