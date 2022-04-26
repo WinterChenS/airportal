@@ -120,7 +120,7 @@ public class FileUploadService extends AbstractUploadService {
         log.info("end file upload");
         return ShareResponse.builder()
                 .takeCode(takeCode)
-                .url(minioHelper.minioProperties.getDownloadUri() + "/download/" + takeCode + "   粘贴到浏览器打开")
+                .url(minioHelper.minioProperties.getDownloadUri() + takeCode + "   粘贴到浏览器打开")
                 .build();
     }
 
