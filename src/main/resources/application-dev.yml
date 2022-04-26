@@ -12,6 +12,7 @@
 #    username:
 #    password:
 #    default-encoding: UTF-8
+#    enable: false
 
 #minio:
 #  endpoint:

@@ -41,12 +41,18 @@ public class MailService {
 
     private final MongoTemplate mongoTemplate;
 
+    @Value("${spring.mail.enable:false}")
+    private boolean enable;
+
     public MailService(JavaMailSender mailSender, MongoTemplate mongoTemplate) {
         this.mailSender = mailSender;
         this.mongoTemplate = mongoTemplate;
     }
 
     public void sendAttachmentsMail(MailSenderRequest mailSenderRequest, MultipartFile multipartFile){
+        if (!enable) {
+            return;
+        }
         log.info("发送邮件开始, mailSenderRequest: [{}]", mailSenderRequest);
         MimeMessage message = mailSender.createMimeMessage();
         final Mail mail = toConvertToBean(mailSenderRequest);

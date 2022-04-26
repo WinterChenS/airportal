@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  delay-server:
+    container_name: airportal
+    image: winterchen/airportal
+    ports:
+      - "8080:8080"
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATA_MONGODB_DATABASE: admin
+      SPRING_DATA_MONGODB_HOST: 127.0.0.1
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_USERNAME: admin
+      SPRING_DATA_MONGODB_PASSWORD: admin
+      SPRING_DATA_MONGODB_AUTHENTICATION-DATABASE: admin
+      SPRING_MAIL_ENABLE: false
+      SPRING_MAIL_HOST: smtp.qiye.aliyun.com
+      SPRING_MAIL_USERNAME: root
+      SPRING_MAIL_PASSWORD: root
+      SPRING_MAIL_DEFAULT-ENCODING: UTF-8
+      MINIO_ENDPOINT: http://127.0.0.1:9000
+      MINIO_ACCESSKEY: minioadmin
+      MINIO_SECRETKEY: minioadmin
+      MINIO_BUCKETNAME: share
+      MINIO_DOWNLOADURI: http://127.0.0.1:3001/?takeCode=     #前端页面的地址
+      MINIO_PATH: http://127.0.0.1:9000   #为了方便https，如果使用nginx反向代理，这里配置nginx反向代理的地址
+      AIRPORTAL_REGISTER_ENABLE: true #是否开放注册
+
+
