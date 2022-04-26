@@ -91,12 +91,22 @@
         </encoder>
     </appender>
 
+    <springProfile name="dev">
     <root level="info">
         <appender-ref ref="stdout" />
         <appender-ref ref="infoFile" />
         <appender-ref ref="warnFile" />
         <appender-ref ref="errorFile" />
     </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="infoFile" />
+            <appender-ref ref="warnFile" />
+            <appender-ref ref="errorFile" />
+        </root>
+    </springProfile>
 
 
 </configuration>
