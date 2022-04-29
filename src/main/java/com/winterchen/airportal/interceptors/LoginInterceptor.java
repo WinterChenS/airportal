@@ -16,6 +16,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +42,9 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         try {
+            if (handler instanceof ResourceHttpRequestHandler) {
+                return true;
+            }
             boolean isNotLoginAccess = hasAnnotation(handler, NotLoginAccess.class);
             if (isNotLoginAccess) {
                 log.debug("==> 方法标记为无需登录也可访问");
