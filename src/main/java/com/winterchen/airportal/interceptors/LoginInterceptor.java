@@ -1,11 +1,13 @@
 package com.winterchen.airportal.interceptors;
 
 import com.google.gson.Gson;
+import com.winterchen.airportal.annotation.AdminAccess;
 import com.winterchen.airportal.annotation.NotLoginAccess;
 import com.winterchen.airportal.base.Result;
 import com.winterchen.airportal.base.ResultCode;
 import com.winterchen.airportal.constants.DefaultConstants;
 import com.winterchen.airportal.entity.User;
+import com.winterchen.airportal.enums.RoleEnum;
 import com.winterchen.airportal.service.UserService;
 import com.winterchen.airportal.utils.EhcacheUtil;
 import com.winterchen.airportal.utils.UserThreadLocal;
@@ -52,13 +54,19 @@ public class LoginInterceptor implements HandlerInterceptor {
             }
             //若是白名单,获取登录信息
             User user = getUserByRequest(request);
-
-
             //若未登录
             if(user == null) {
                 outErrorMsg(response);
                 return false;
             }
+            final boolean adminAccess = hasAnnotation(handler, AdminAccess.class);
+            if (adminAccess) {
+                if (StringUtils.isBlank(user.getRole()) || !user.getRole().equals(RoleEnum.ADMIN.name())) {
+                    outErrorMsg(response, ResultCode.USER_NOT_HAS_AUTH.getCode(), ResultCode.USER_NOT_HAS_AUTH.getMessage());
+                    return false;
+                }
+            }
+
 
 
             //登录用户存在ThreadLocal中

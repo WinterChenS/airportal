@@ -23,6 +23,7 @@ public enum ResultCode {
     USER_IS_BLOCK(2003, "账号已被禁用"),
     USER_NOT_EXIST(2004, "用户不存在"),
     USER_HAS_EXISTED(2005, "用户已存在"),
+    USER_NOT_HAS_AUTH(2006, "没有访问权限"),
     KNOWN_ERROR(3001, "未知异常，请联系管理员"),
     FILE_IO_ERROR(4001, "文件io异常"),
     MINIO_SERVER_ERROR(4002, "文件服务器异常"),

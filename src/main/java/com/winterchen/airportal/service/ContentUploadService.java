@@ -98,6 +98,23 @@ public class ContentUploadService extends AbstractUploadService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String get(String takeCode, String pass, HttpServletResponse response) {
+
+
+        final FileInfo fileInfo = checkInfo(takeCode, pass);
+        fileInfo.setMaxGetCount(fileInfo.getMaxGetCount() - 1);
+        mongoTemplate.save(fileInfo);
+        EhcacheUtil.put(takeCode, fileInfo);
+        return fileInfo.getContent();
+    }
+
+    @Override
+    public boolean check(String takeCode, String pass) {
+        final FileInfo fileInfo = checkInfo(takeCode, pass);
+        return fileInfo != null;
+    }
+
+
+    public FileInfo checkInfo(String takeCode, String pass) {
         //需要从缓存中查询校验码，如果不存在就不进行后续的操作，防止被刷库,同时校验密码
         final FileInfo fileInfoInCache = (FileInfo) EhcacheUtil.get(takeCode);
         Assert.notNull(fileInfoInCache, "文件不存在");
@@ -115,17 +132,7 @@ public class ContentUploadService extends AbstractUploadService {
         Query query = new Query(Criteria.where("takeCode").is(takeCode).and("deleted").is(false));
         final FileInfo fileInfo = mongoTemplate.findOne(query, FileInfo.class);
         Assert.notNull(fileInfo, "文件不存在");
-
-        fileInfo.setMaxGetCount(fileInfo.getMaxGetCount() - 1);
-        mongoTemplate.save(fileInfo);
-        EhcacheUtil.put(takeCode, fileInfo);
-        return fileInfo.getContent();
-    }
-
-    @Override
-    public boolean check(String takeCode, String pass) {
-        final String s = get(takeCode, pass, null);
-        return StringUtils.isNotBlank(s);
+        return fileInfo;
     }
 
     @Override
