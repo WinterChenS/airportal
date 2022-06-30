@@ -231,5 +231,6 @@ docker-compose up -d
 
 ### 报错解决方案
 1. `PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException`
+
 解决方案: [点击进入](https://github.com/WinterChenS/airportal-frontend/wiki/PKIX-path-building-failed:-sun.security.provider.certpath.SunCertPathBuilderException)
 
