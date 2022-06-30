@@ -8,7 +8,7 @@ services:
       - "8080:8080"
     volumes:
       - "./tmp:/tmp"
-      - ./conf/airportal.yml:/home/winterchen/conf/airportal.yml
+      - ./conf/:/home/winterchen/conf/
     environment:
       SERVER_PORT: 8080
       SPRING_DATA_MONGODB_DATABASE: admin
