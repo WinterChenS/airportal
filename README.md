@@ -41,7 +41,7 @@ npm run serve  #启动本地调试
 
 ### docker-compose部署(推荐)
 
-*1.nginx 配置*
+**1.nginx 配置**
 
 ```
 ## minio分片上传的nginx配置，需要ssl
@@ -119,7 +119,7 @@ server {
   }
 ```
 
-*2.minio部署*
+**2.minio部署**
 docker-compose.yml
 ```yaml
 version: '2'
@@ -147,7 +147,7 @@ services:
 docker-compose up -d
 ```
 
-*3.mongodb部署*
+**3.mongodb部署**
 
 ```yaml
 version: '3.9'
@@ -169,7 +169,7 @@ services:
 docker-compose up -d
 ```
 
-*4.airportal部署*
+**4.airportal部署**
 
 新建文件:
 /home/winterchen/conf/airportal.yml
