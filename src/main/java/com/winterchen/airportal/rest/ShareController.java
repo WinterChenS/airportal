@@ -11,6 +11,7 @@ import cn.hutool.core.lang.Assert;
 import com.winterchen.airportal.annotation.NotLoginAccess;
 import com.winterchen.airportal.enums.UploadType;
 import com.winterchen.airportal.request.CompleteMultipartUploadRequest;
+import com.winterchen.airportal.request.ContentShareRequest;
 import com.winterchen.airportal.request.MultipartUploadCreateRequest;
 import com.winterchen.airportal.response.FileInfoResponse;
 import com.winterchen.airportal.response.MultipartUploadCreateResponse;
@@ -67,20 +68,10 @@ public class ShareController {
     @ApiOperation("内容上传")
     @PostMapping("/upload/content")
     public ShareResponse uploadContent(
-            @RequestParam(name = "content", required = true)
-            @ApiParam(value = "content",required = true)
-                    String content,
-            @RequestParam(name = "pass", required = false)
-            @ApiParam(value = "pass",required = false)
-                    String pass,
-            @RequestParam(name = "expire", required = true)
-            @ApiParam(value = "expire",required = false)
-                    Integer expire,
-            @RequestParam(name = "maxGetCount", required = true)
-            @ApiParam(value = "maxGetCount",required = false)
-                    Integer maxGetCount
+            @RequestBody
+            ContentShareRequest contentShareRequest
     ) {
-        return shareService.upload(content, pass, expire, maxGetCount, UploadType.STRING.name());
+        return shareService.upload(contentShareRequest.getContent(), contentShareRequest.getPass(), contentShareRequest.getExpire(), contentShareRequest.getMaxGetCount(), UploadType.STRING.name());
     }
 
 
